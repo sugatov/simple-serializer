@@ -1,14 +1,6 @@
 Simple-Serializer
 ================
 
-
-[![Build Status](https://secure.travis-ci.org/opensoft/simple-serializer.png?branch=develop)](http://travis-ci.org/opensoft/simple-serializer)
-[![Total Downloads](https://poser.pugx.org/opensoft/simple-serializer/downloads.png)](https://packagist.org/packages/opensoft/simple-serializer)
-[![Latest Stable Version](https://poser.pugx.org/opensoft/simple-serializer/v/stable.png)](https://packagist.org/packages/opensoft/simple-serializer)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/opensoft/simple-serializer/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/opensoft/simple-serializer/?branch=develop)
-[![Code Coverage](https://scrutinizer-ci.com/g/opensoft/simple-serializer/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/opensoft/simple-serializer/?branch=develop)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/950193f2-a3a7-4117-a267-e4b1c95fe5b3/mini.png)](https://insight.sensiolabs.com/projects/950193f2-a3a7-4117-a267-e4b1c95fe5b3)
-
 Introduction
 ------------
 
@@ -19,7 +11,7 @@ Built-in features include:
 
 - (de-)serialize object graphs
 - supports boolean, integer, double, DateTime\<format\>, array, T, array\<T\>, null types, where "T" - is some PHP object.
-- configurable via YAML
+- configurable via YAML(symfony/yaml) or annotations (doctrine/annotations)
 - three unserialize mode (non-strict, medium strict, strict)
 
 Unserialize mode:
@@ -35,13 +27,11 @@ Some Restrictions:
 Possible TODO list:
 
 - (de-)serialize object graphs of any complexity including circular references
-- configurable via PHP, XML, or annotations
+- configurable via PHP or XML
 - custom integrates with Doctrine ORM, et. al.
 
 It should be noted that Simple-Serializer is realy simple library with minimum configuration,
 but it provides wide opportunity for create REST API.
-
-[![Build Status](https://secure.travis-ci.org/opensoft/simple-serializer.png?branch=master)](http://travis-ci.org/opensoft/simple-serializer)
 
 
 Installation
@@ -68,6 +58,18 @@ command from the directory where your ``composer.json`` file is located:
 Configuration
 -------------
 
+To get an instance you could configure it manually or use configuration builder:
+```php
+$serializer = \Opensoft\SimpleSerializer\Configuration::createYamlMetadataConfiguration(array(
+    'MyApplication\Objects' => 'path/to/MyApplication/Objects'
+));
+```
+or
+```php
+$serializer = \Opensoft\SimpleSerializer\Configuration::createAnnotationMetadataConfiguration();
+```
+
+YAML metadata example:
 ```yml
 MyBundle\Resources\config\serializer\ClassName.yml
     Fully\Qualified\ClassName:
@@ -79,6 +81,35 @@ MyBundle\Resources\config\serializer\ClassName.yml
                 since_version: 1.0
                 until_version: 2.0
                 groups: ['get','patch']
+```
+
+Annotation metadata example:
+```php
+use Opensoft\SimpleSerializer\Metadata\Annotations as Serializer;
+
+class MyObject
+{
+    /**
+     * @Serializer\Expose(true)
+     * @Serializer\Type("DateTime<W3C>")
+     * @Serializer\SerializedName("date")
+     */
+    public $myDateProperty;
+
+    /**
+     * @Serializer\Expose(true)
+     * @Serializer\Type("Fully\Qualified\ClassName")
+     */
+    private $myObjectProperty;
+    public function getMyObjectProperty()
+    {
+        return $this->myObjectProperty;
+    }
+    public function setMyObjectProperty($object)
+    {
+        $this->myObjectProperty = $object;
+    }
+}
 ```
 
 * expose
